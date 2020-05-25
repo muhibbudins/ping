@@ -17,35 +17,35 @@ Result content
 {
   "hops": [
     {
-      "bytes": "64",
+      "bytes": 64,
       "ip": "216.239.38.120",
-      "icmp_seq": "0",
-      "ttl": "52",
-      "time": "16.244"
+      "sequence": 0,
+      "ttl": 52,
+      "time": 17.125
     },
     {
-      "bytes": "64",
+      "bytes": 64,
       "ip": "216.239.38.120",
-      "icmp_seq": "1",
-      "ttl": "52",
-      "time": "16.571"
+      "sequence": 1,
+      "ttl": 52,
+      "time": 15.484
     }
   ],
   "detail": {
     "domain": "forcesafesearch.google.com",
     "ip": "216.239.38.120",
-    "bytes": "56"
+    "bytes": 56
   },
   "result": {
-    "transmitted": "2",
-    "received": "2",
-    "loss": "0.0"
+    "transmitted": 2,
+    "received": 2,
+    "loss": 0
   },
   "stats": {
-    "min": "16.244",
-    "avg": "16.407",
-    "max": "16.571",
-    "stddev": "0.164"
+    "min": 15.484,
+    "avg": 16.305,
+    "max": 17.125,
+    "stddev": 0.82
   }
 }
 ```

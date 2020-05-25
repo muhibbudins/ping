@@ -3,41 +3,41 @@ import { exec, OutputMode } from "https://deno.land/x/exec/mod.ts";
 interface Detail {
   domain: string
   ip: string
-  bytes: string
+  bytes: number
 }
 
 interface Hops {
-  bytes: string
+  bytes: number
   ip: string
-  icmp_seq: string
-  ttl: string
-  time: string
+  sequence: number
+  ttl: number
+  time: number
 }
 
 interface Result {
-  transmitted: string
-  received: string
-  loss: string
+  transmitted: number
+  received: number
+  loss: number
 }
 
 interface Stats {
-  min: string
-  avg: string
-  max: string
-  stddev: string
+  min: number
+  avg: number
+  max: number
+  stddev: number
 }
 
 type Output = {
-  detail: Detail
   hops: Array<Hops>
-  result: Result
   stats: Stats
+  detail: Detail
+  result: Result
 }
 
-const PATTERN_A = /^PING\s(.+)\s\((.+)\):?\s(\d+)/
-const PATTERN_B = /^(\d+).*?from\s(.+)\:.*?icmp_seq=(\d+).*?ttl=(\d+).*?time=(.+)\s\ms.*?/
-const PATTERN_C = /^(\d+).+(\d+).+\,\s(\d\.?\d?).+/
-const PATTERN_D = /.+\s=\s(.+)\/(.+)\/(.+)\/(.+)\s\ms/
+const PATTERN_HOPS = /^(\d+).*?from\s(.+)\:.*?icmp_seq=(\d+).*?ttl=(\d+).*?time=(.+)\s\ms.*?/
+const PATTERN_STATS = /.+\s=\s(.+)\/(.+)\/(.+)\/(.+)\s\ms/
+const PATTERN_RESULT = /^(\d+).+(\d+).+\,\s(\d\.?\d?).+/
+const PATTERN_DETAIL = /^PING\s(.+)\s\((.+)\):?\s(\d+)/
 
 function Parser(raw: string): Output {
   const data = <Output>{}
@@ -46,21 +46,62 @@ function Parser(raw: string): Output {
 
   raw.split('\n')
     .map(line => {
-      if (PATTERN_A.test(line)) {
-        const [, domain, ip, bytes] = PATTERN_A.exec(line) || []
-        data['detail'] = { domain, ip, bytes }
+      if (PATTERN_HOPS.test(line)) {
+        const [,
+          bytes,
+          ip,
+          icmp_seq,
+          ttl,
+          time
+        ] = PATTERN_HOPS.exec(line) || []
+
+        data['hops'].push({
+          ip,
+          bytes: parseFloat(bytes),
+          sequence: parseFloat(icmp_seq),
+          ttl: parseFloat(ttl),
+          time: parseFloat(time)
+        })
       }
-      if (PATTERN_B.test(line)) {
-        const [, bytes, ip, icmp_seq, ttl, time] = PATTERN_B.exec(line) || []
-        data['hops'].push({ bytes, ip, icmp_seq, ttl, time })
+      if (PATTERN_STATS.test(line)) {
+        const [,
+          min,
+          avg,
+          max,
+          stddev
+        ] = PATTERN_STATS.exec(line) || []
+        
+        data['stats'] = {
+          min: parseFloat(min),
+          avg: parseFloat(avg),
+          max: parseFloat(max),
+          stddev: parseFloat(stddev)
+        }
       }
-      if (PATTERN_C.test(line)) {
-        const [, transmitted, received, loss] = PATTERN_C.exec(line) || []
-        data['result'] = { transmitted, received, loss }
+      if (PATTERN_RESULT.test(line)) {
+        const [,
+          transmitted,
+          received,
+          loss
+        ] = PATTERN_RESULT.exec(line) || []
+
+        data['result'] = {
+          transmitted: parseFloat(transmitted),
+          received: parseFloat(received),
+          loss: parseFloat(loss)
+        }
       }
-      if (PATTERN_D.test(line)) {
-        const [, min, avg, max, stddev] = PATTERN_D.exec(line) || []
-        data['stats'] = { min, avg, max, stddev }
+      if (PATTERN_DETAIL.test(line)) {
+        const [,
+          domain,
+          ip,
+          bytes] = PATTERN_DETAIL.exec(line) || []
+
+        data['detail'] = {
+          ip,
+          domain,
+          bytes: parseFloat(bytes)
+        }
       }
     })
     .filter(line => line)
@@ -68,7 +109,16 @@ function Parser(raw: string): Output {
   return data
 }
 
-export default async function Ping(destination: string, times: number = 4): Promise<Output> {
-  let result = await exec(`ping ${destination} -c ${times}`, { output: OutputMode.Capture });
+export default async function Ping(
+  destination: string,
+  times: number = 4
+): Promise<Output> {
+  let result = await exec(
+    `ping ${destination} -c ${times}`,
+    {
+      output: OutputMode.Capture
+    }
+  );
+
   return Parser(result.output)
 }
