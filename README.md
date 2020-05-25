@@ -17,23 +17,23 @@ Result content
 {
   "hops": [
     {
-      "bytes": 64,
       "ip": "216.239.38.120",
+      "bytes": 64,
       "sequence": 0,
       "ttl": 52,
-      "time": 17.125
+      "time": 16.114
     },
     {
-      "bytes": 64,
       "ip": "216.239.38.120",
+      "bytes": 64,
       "sequence": 1,
       "ttl": 52,
-      "time": 15.484
+      "time": 15.489
     }
   ],
   "detail": {
-    "domain": "forcesafesearch.google.com",
     "ip": "216.239.38.120",
+    "domain": "forcesafesearch.google.com",
     "bytes": 56
   },
   "result": {
@@ -42,10 +42,10 @@ Result content
     "loss": 0
   },
   "stats": {
-    "min": 15.484,
-    "avg": 16.305,
-    "max": 17.125,
-    "stddev": 0.82
+    "min": 15.489,
+    "avg": 15.802,
+    "max": 16.114,
+    "stddev": 0.312
   }
 }
 ```
